@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToMany, JoinTable } from 'typeorm';
 import { Compagne } from '../compagnes/compagne.entity';
 
 @Entity()
@@ -15,6 +15,8 @@ export class Agent {
   @Column()
   phone: string;
 
-  @ManyToOne(() => Compagne, (compagne) => compagne.agents, { onDelete: 'CASCADE' })
-  compagne: Compagne;
+  // Many-to-many relationship with Compagnes
+  @ManyToMany(() => Compagne, (compagne) => compagne.agents, { cascade: true })
+  @JoinTable()
+  compagnes: Compagne[];
 }

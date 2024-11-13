@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, ILike } from 'typeorm';
+import { Repository, In } from 'typeorm';
 import { Agent } from './agent.entity';
 import { Compagne } from '../compagnes/compagne.entity';
 import { CreateAgentDto } from '../dto/create-agent.dto';
@@ -16,67 +16,51 @@ export class AgentsService {
   ) {}
 
   async findAll(): Promise<Agent[]> {
-    return this.agentsRepository.find({ relations: ['compagne'] });
+    return this.agentsRepository.find({ relations: ['compagnes'] });
   }
 
   async findOne(id: string): Promise<Agent> {
     return this.agentsRepository.findOne({
       where: { id: parseInt(id) },
-      relations: ['compagne'],
+      relations: ['compagnes'],
     });
   }
 
   async create(createAgentDto: CreateAgentDto): Promise<Agent> {
-    const { compagneId, ...agentData } = createAgentDto;
+    const { compagneIds, ...agentData } = createAgentDto;
     const agent = this.agentsRepository.create(agentData);
-  
-    if (compagneId) {
-      const compagne = await this.compagneRepository.findOne({
-        where: { id: compagneId },
-      });
-      
-      if (!compagne) throw new Error(`Compagne with ID "${compagneId}" not found`);
-      agent.compagne = compagne;
-    }
-  
-    return this.agentsRepository.save(agent);
-  }
-  
 
-  async update(id: string, updateAgentDto: UpdateAgentDto): Promise<Agent> {
-    const { compagneId, ...updateData } = updateAgentDto;
-    const agent = await this.agentsRepository.preload({
-      id: parseInt(id),
-      ...updateData,
-    });
-  
-    if (!agent) {
-      throw new Error('Agent not found');
+    if (compagneIds) {
+      const compagnes = await this.compagneRepository.findBy({ id: In(compagneIds) });
+      agent.compagnes = compagnes;
     }
-  
-    if (compagneId !== undefined) {
-      const compagne = await this.compagneRepository.findOne({
-        where: { id: compagneId },
-      });
-  
-      if (!compagne) throw new Error(`Compagne with ID "${compagneId}" not found`);
-      agent.compagne = compagne;
-    }
-  
+
     return this.agentsRepository.save(agent);
   }
-  
+
+  async update(id: number, updateAgentDto: UpdateAgentDto): Promise<Agent> {
+    const { compagneIds, ...updateData } = updateAgentDto;
+    const agent = await this.agentsRepository.preload({ id, ...updateData });
+
+    if (!agent) throw new Error('Agent not found');
+
+    if (compagneIds) {
+      const compagnes = await this.compagneRepository.findBy({ id: In(compagneIds) });
+      agent.compagnes = compagnes;
+    }
+
+    return this.agentsRepository.save(agent);
+  }
 
   async remove(id: string): Promise<void> {
     const agent = await this.findOne(id);
     if (agent) {
-      // Optionally remove the reference in the related compagne
-      if (agent.compagne) {
-        agent.compagne = null;
-        await this.agentsRepository.save(agent);
-      }
+      // Set compagnes to an empty array to remove associations
+      agent.compagnes = [];
+      await this.agentsRepository.save(agent);
+
+      // Finally delete the agent
       await this.agentsRepository.delete(parseInt(id));
     }
   }
-  
 }

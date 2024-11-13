@@ -9,27 +9,27 @@ export class AgentsController {
   constructor(private readonly agentsService: AgentsService) {}
 
   @Get()
-  findAll(): Promise<Agent[]> {
+  async findAll(): Promise<Agent[]> {
     return this.agentsService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string): Promise<Agent> {
+  async findOne(@Param('id') id: string): Promise<Agent> {
     return this.agentsService.findOne(id);
   }
 
   @Post()
-  create(@Body() createAgentDto: CreateAgentDto): Promise<Agent> {
+  async create(@Body() createAgentDto: CreateAgentDto): Promise<Agent> {
     return this.agentsService.create(createAgentDto);
   }
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() updateAgentDto: UpdateAgentDto): Promise<Agent> {
-    return this.agentsService.update(id, updateAgentDto);
+  async update(@Param('id') id: string, @Body() updateAgentDto: UpdateAgentDto): Promise<Agent> {
+    return this.agentsService.update(parseInt(id), updateAgentDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string): Promise<void> {
-    return this.agentsService.remove(id);
+  async remove(@Param('id') id: string): Promise<void> {
+    await this.agentsService.remove(id);
   }
 }

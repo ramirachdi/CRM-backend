@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToMany } from 'typeorm';
 import { Agent } from '../agents/agent.entity';
 
 @Entity()
@@ -18,6 +18,7 @@ export class Compagne {
   @Column()
   typeDeService: string;
 
-  @OneToMany(() => Agent, (agent) => agent.compagne)
+  // Many-to-many relationship with Agents
+  @ManyToMany(() => Agent, (agent) => agent.compagnes)
   agents: Agent[];
 }

@@ -31,21 +31,15 @@ export class CompagnesService {
   async create(createCompagneDto: CreateCompagneDto): Promise<Compagne> {
     const { agentsIds, ...compagneData } = createCompagneDto;
     const compagne = this.compagneRepository.create(compagneData);
-  
+
+    // If agent IDs are provided, find and associate them in a many-to-many relationship
     if (agentsIds && agentsIds.length > 0) {
       const agents = await this.agentsRepository.findBy({ id: In(agentsIds) });
-      compagne.agents = agents;
-  
-      // Set the compagne reference in each agent
-      for (const agent of agents) {
-        agent.compagne = compagne;
-      }
-      await this.agentsRepository.save(agents);  // Save changes to agents
+      compagne.agents = agents; // Directly set agents for the many-to-many relationship
     }
-  
+
     return this.compagneRepository.save(compagne);
   }
-  
 
   async update(id: number, updateCompagneDto: UpdateCompagneDto): Promise<Compagne> {
     const { agentsIds, ...compagneData } = updateCompagneDto;
@@ -54,21 +48,15 @@ export class CompagnesService {
       ...compagneData,
     });
     if (!compagne) throw new Error('Compagne not found');
-  
+
+    // If agent IDs are provided, update the many-to-many relationship
     if (agentsIds) {
       const agents = await this.agentsRepository.findBy({ id: In(agentsIds) });
-      compagne.agents = agents;
-  
-      // Set the compagne reference in each agent
-      for (const agent of agents) {
-        agent.compagne = compagne;
-      }
-      await this.agentsRepository.save(agents);  // Save changes to agents
+      compagne.agents = agents; // Update agents for the many-to-many relationship
     }
-  
+
     return this.compagneRepository.save(compagne);
   }
-  
 
   async remove(id: number): Promise<void> {
     await this.compagneRepository.delete(id);

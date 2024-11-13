@@ -1,4 +1,4 @@
-import { IsString, IsEmail, IsOptional ,IsNumber} from 'class-validator';
+import { IsString, IsEmail, IsOptional ,IsArray} from 'class-validator';
 
 export class UpdateAgentDto {
   @IsOptional()
@@ -13,7 +13,7 @@ export class UpdateAgentDto {
   @IsString()
   phone?: string;
 
+  @IsArray()
   @IsOptional()
-  @IsNumber()
-  compagneId?: number; 
+  compagneIds?: number[];
 }

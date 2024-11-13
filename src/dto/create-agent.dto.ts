@@ -1,4 +1,4 @@
-import { IsString, IsEmail, IsOptional, IsNotEmpty, IsNumber } from 'class-validator';
+import { IsString, IsEmail, IsOptional, IsNotEmpty, IsArray, IsNumber } from 'class-validator';
 
 export class CreateAgentDto {
   @IsNotEmpty()
@@ -13,7 +13,7 @@ export class CreateAgentDto {
   @IsOptional()
   phone?: string;
 
+  @IsArray()
   @IsOptional()
-  @IsNumber()
-  compagneId?: number;
+  compagneIds?: number[];
 }
