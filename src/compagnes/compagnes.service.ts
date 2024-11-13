@@ -59,6 +59,15 @@ export class CompagnesService {
   }
 
   async remove(id: number): Promise<void> {
-    await this.compagneRepository.delete(id);
+    const compagne = await this.findOne(id);
+    if (compagne) {
+      // Remove associations with agents by setting agents to an empty array
+      compagne.agents = [];
+      await this.compagneRepository.save(compagne);
+  
+      // Finally delete the compagne
+      await this.compagneRepository.delete(id);
+    }
   }
+  
 }
