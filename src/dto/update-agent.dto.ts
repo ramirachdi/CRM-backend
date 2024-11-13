@@ -1,15 +1,19 @@
-import { IsString, IsEmail, IsOptional } from 'class-validator';
+import { IsString, IsEmail, IsOptional ,IsNumber} from 'class-validator';
 
 export class UpdateAgentDto {
-  @IsString()
   @IsOptional()
+  @IsString()
   name?: string;
 
-  @IsEmail()
   @IsOptional()
+  @IsEmail()
   email?: string;
 
-  @IsString()
   @IsOptional()
+  @IsString()
   phone?: string;
+
+  @IsOptional()
+  @IsNumber()
+  compagneId?: number; 
 }

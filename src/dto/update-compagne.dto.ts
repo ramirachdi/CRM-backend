@@ -1,4 +1,4 @@
-import { IsString,IsEmail, IsOptional } from 'class-validator';
+import { IsString,IsEmail, IsOptional, IsArray, IsNumber} from 'class-validator';
 
 export class UpdateCompagneDto {
   @IsString()
@@ -16,4 +16,8 @@ export class UpdateCompagneDto {
   @IsString()
   @IsOptional()
   typeDeService: string;
+
+  @IsOptional()
+  @IsArray()
+  agentsIds?: number[];
 }

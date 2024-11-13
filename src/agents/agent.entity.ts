@@ -1,4 +1,5 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
+import { Compagne } from '../compagnes/compagne.entity';
 
 @Entity()
 export class Agent {
@@ -13,4 +14,7 @@ export class Agent {
 
   @Column()
   phone: string;
+
+  @ManyToOne(() => Compagne, (compagne) => compagne.agents, { onDelete: 'CASCADE' })
+  compagne: Compagne;
 }
