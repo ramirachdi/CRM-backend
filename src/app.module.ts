@@ -8,6 +8,9 @@ import { AgentsModule } from './agents/agents.module';
 import { CompagnesService } from './compagnes/compagnes.service';
 import { CompagnesController } from './compagnes/compagnes.controller';
 import { CompagnesModule } from './compagnes/compagnes.module';
+import { StatisticsService } from './statistics/statistics.service';
+import { StatisticsController } from './statistics/statistics.controller';
+import { StatisticsModule } from './statistics/statistics.module';
 
 @Module({
   imports: [
@@ -23,6 +26,7 @@ import { CompagnesModule } from './compagnes/compagnes.module';
     }),
     AgentsModule,
     CompagnesModule,
+    StatisticsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

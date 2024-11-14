@@ -1,5 +1,6 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToMany, JoinTable } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToMany, JoinTable, OneToMany } from 'typeorm';
 import { Compagne } from '../compagnes/compagne.entity';
+import { Statistics } from '../statistics/statistics.entity';
 
 @Entity()
 export class Agent {
@@ -19,4 +20,7 @@ export class Agent {
   @ManyToMany(() => Compagne, (compagne) => compagne.agents, { cascade: true })
   @JoinTable()
   compagnes: Compagne[];
+
+  @OneToMany(() => Statistics, (statistics) => statistics.agent)
+  statistics: Statistics[];
 }

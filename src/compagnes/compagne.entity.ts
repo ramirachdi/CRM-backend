@@ -1,5 +1,6 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToMany } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToMany, OneToMany } from 'typeorm';
 import { Agent } from '../agents/agent.entity';
+import { Statistics } from '../statistics/statistics.entity';
 
 @Entity()
 export class Compagne {
@@ -21,4 +22,7 @@ export class Compagne {
   // Many-to-many relationship with Agents
   @ManyToMany(() => Agent, (agent) => agent.compagnes)
   agents: Agent[];
+
+  @OneToMany(() => Statistics, (statistics) => statistics.compagne)
+  statistics: Statistics[];
 }
