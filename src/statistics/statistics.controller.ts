@@ -6,16 +6,6 @@ import { Statistics } from './statistics.entity';
 export class StatisticsController {
   constructor(private readonly statisticsService: StatisticsService) {}
 
-  @Get()
-  findAll(): Promise<Statistics[]> {
-    return this.statisticsService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string): Promise<Statistics> {
-    return this.statisticsService.findOne(+id);
-  }
-
   @Get('betweenDates')
   async getStatisticsBetweenDates(
     @Query('agentId') agentId: string,
@@ -48,10 +38,26 @@ export class StatisticsController {
     );
   }
 
+  @Get(':id')
+  findOne(@Param('id') id: string): Promise<Statistics> {
+    return this.statisticsService.findOne(+id);
+  }
+
+  @Get()
+  findAll(): Promise<Statistics[]> {
+    return this.statisticsService.findAll();
+  }
+
   @Post()
   createOrUpdate(@Body() statsData: any): Promise<Statistics> {
     const { agentId, compagneId, dateDebut, dateFin, ...statisticsFields } = statsData;
-    return this.statisticsService.createOrUpdateStatistics(agentId, compagneId, new Date(dateDebut), new Date(dateFin), statisticsFields);
+    return this.statisticsService.createOrUpdateStatistics(
+      agentId,
+      compagneId,
+      new Date(dateDebut),
+      new Date(dateFin),
+      statisticsFields,
+    );
   }
 
   @Delete(':id')

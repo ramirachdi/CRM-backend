@@ -52,53 +52,50 @@ export class StatisticsService {
     dateDebut: Date,
     dateFin: Date
   ): Promise<any> {
-    const statsRecords = await this.statisticsRepository.find({
-      where: {
-        agent: { id: agentId },
-        compagne: { id: compagneId },
-        dateDebut: Between(dateDebut, dateFin),
-      },
-    });
-  
-    if (!statsRecords.length) {
-      return { message: 'No statistics found for the given period and IDs.' };
-    }
-  
-    // Aggregate data as per your requirement
-    const result = statsRecords.reduce(
-      (acc, record) => {
-        acc.nombreAppelsEntrants += record.nombreAppelsEntrants;
-        acc.dtce += record.dtce;
-        acc.nombreAppelsSortants += record.nombreAppelsSortants;
-        acc.dtcs += record.dtcs;
-        acc.totalDays += 1;
-        return acc;
-      },
-      {
-        nombreAppelsEntrants: 0,
-        dtce: 0,
-        nombreAppelsSortants: 0,
-        dtcs: 0,
-        totalDays: 0,
+    let currentDate = new Date(dateDebut);
+    const endDate = new Date(dateFin);
+
+    const result = {
+      nombreAppelsEntrants: 0,
+      dtce: 0,
+      dmce: 0,
+      nombreAppelsSortants: 0,
+      dtcs: 0,
+      dmcs: 0,
+      totalDays: 0,
+    };
+
+    while (currentDate <= endDate) {
+      const stats = await this.statisticsRepository.findOne({
+        where: {
+          agent: { id: agentId },
+          compagne: { id: compagneId },
+          dateDebut: currentDate,
+        },
+      });
+
+      if (stats) {
+        result.nombreAppelsEntrants += stats.nombreAppelsEntrants || 0;
+        result.dtce += stats.dtce || 0;
+        result.nombreAppelsSortants += stats.nombreAppelsSortants || 0;
+        result.dtcs += stats.dtcs || 0;
+        result.totalDays += 1;
       }
-    );
-  
-    const dmce = result.nombreAppelsEntrants > 0 ? result.dtce / result.nombreAppelsEntrants : 0;
-    const dmcs = result.nombreAppelsSortants > 0 ? result.dtcs / result.nombreAppelsSortants : 0;
-  
+
+      // Increment currentDate by one day
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+
+    // Calculate averages for dmce and dmcs
+    result.dmce = result.nombreAppelsEntrants > 0 ? result.dtce / result.nombreAppelsEntrants : 0;
+    result.dmcs = result.nombreAppelsSortants > 0 ? result.dtcs / result.nombreAppelsSortants : 0;
+
     return {
       agentId,
       compagneId,
-      nombreAppelsEntrants: result.nombreAppelsEntrants,
-      dtce: result.dtce,
-      dmce,
-      nombreAppelsSortants: result.nombreAppelsSortants,
-      dtcs: result.dtcs,
-      dmcs,
+      ...result,
     };
   }
-  
-  
 
   async findAll(): Promise<Statistics[]> {
     return this.statisticsRepository.find({ relations: ['agent', 'compagne'] });
