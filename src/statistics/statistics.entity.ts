@@ -14,10 +14,10 @@ export class Statistics {
   @ManyToOne(() => Compagne, (compagne) => compagne.statistics, { onDelete: 'CASCADE' })
   compagne: Compagne;
 
-  @Column()
+  @Column({ type: 'date' })
   dateDebut: Date;
 
-  @Column()
+  @Column({ type: 'date' })
   dateFin: Date;
 
   @Column({ default: 0 })
