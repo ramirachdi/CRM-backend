@@ -74,7 +74,7 @@ export class StatisticsService {
       dmcs: 0,
     };
   
-    // Loop through each day within the range from dateDebut to dateFin
+    // Loop through each day within the range from dateDebut to the dateFin
     let currentDate = new Date(startDate);
     while (currentDate <= endDate) {
       const dayStart = new Date(currentDate);
