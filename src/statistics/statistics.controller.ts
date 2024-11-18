@@ -38,6 +38,55 @@ export class StatisticsController {
     );
   }
 
+  @Get('agentStatsForCompagnes')
+  async getAgentStatsForCompagnes(
+    @Query('agentId') agentId: string,
+    @Query('dateDebut') dateDebut: string,
+    @Query('dateFin') dateFin: string,
+  ) {
+    const parsedAgentId = parseInt(agentId);
+    const parsedDateDebut = new Date(dateDebut);
+    const parsedDateFin = new Date(dateFin);
+
+    if (isNaN(parsedAgentId) || isNaN(parsedDateDebut.getTime()) || isNaN(parsedDateFin.getTime())) {
+      throw new HttpException(
+        'Invalid input: ensure agentId, dateDebut, and dateFin are correctly formatted.',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    return this.statisticsService.getAgentStatisticsForAllCompagnes(
+      parsedAgentId,
+      parsedDateDebut,
+      parsedDateFin,
+    );
+  }
+
+  @Get('summedAgentStats')
+  async getSummedAgentStats(
+    @Query('agentId') agentId: string,
+    @Query('dateDebut') dateDebut: string,
+    @Query('dateFin') dateFin: string,
+  ) {
+    const parsedAgentId = parseInt(agentId);
+    const parsedDateDebut = new Date(dateDebut);
+    const parsedDateFin = new Date(dateFin);
+
+    if (isNaN(parsedAgentId) || isNaN(parsedDateDebut.getTime()) || isNaN(parsedDateFin.getTime())) {
+      throw new HttpException(
+        'Invalid input: ensure agentId, dateDebut, and dateFin are correctly formatted.',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    return this.statisticsService.getSummedAgentStatisticsForAllCompagnes(
+      parsedAgentId,
+      parsedDateDebut,
+      parsedDateFin,
+    );
+  }
+
+
   @Get('compagneBetweenDates')
   async getCompagneStatisticsBetweenDates(
     @Query('compagneId') compagneId: string,

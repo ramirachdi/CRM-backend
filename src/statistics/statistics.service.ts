@@ -175,6 +175,124 @@ export class StatisticsService {
     };
   }
   
+  async getAgentStatisticsForAllCompagnes(agentId: number, dateDebut: Date, dateFin: Date): Promise<any[]> {
+    const startDate = new Date(dateDebut);
+    const endDate = new Date(dateFin);
+  
+    // Query to get all compagnes the agent works for
+    const compagnes = await this.compagneRepository
+      .createQueryBuilder('compagne')
+      .leftJoinAndSelect('compagne.agents', 'agent')
+      .where('agent.id = :agentId', { agentId })
+      .getMany();
+  
+    const results = [];
+  
+    // Loop through each compagne and calculate statistics
+    for (const compagne of compagnes) {
+      const stats = {
+        compagneId: compagne.id,
+        compagneName: compagne.name,
+        nombreAppelsEntrants: 0,
+        dtce: 0,
+        dmce: 0,
+        nombreAppelsSortants: 0,
+        dtcs: 0,
+        dmcs: 0,
+        totalDays: 0,
+      };
+  
+      let currentDate = new Date(startDate);
+      while (currentDate <= endDate) {
+        const dayStart = new Date(currentDate);
+        dayStart.setHours(0, 0, 0, 0);
+        const dayEnd = new Date(currentDate);
+        dayEnd.setHours(23, 59, 59, 999);
+  
+        const dayStats = await this.statisticsRepository.findOne({
+          where: {
+            agent: { id: agentId },
+            compagne: { id: compagne.id },
+            dateDebut: Between(dayStart, dayEnd),
+          },
+        });
+  
+        if (dayStats) {
+          stats.nombreAppelsEntrants += dayStats.nombreAppelsEntrants;
+          stats.dtce += dayStats.dtce;
+          stats.nombreAppelsSortants += dayStats.nombreAppelsSortants;
+          stats.dtcs += dayStats.dtcs;
+          stats.totalDays += 1;
+        }
+  
+        currentDate.setDate(currentDate.getDate() + 1);
+      }
+  
+      stats.dmce = stats.nombreAppelsEntrants > 0 ? stats.dtce / stats.nombreAppelsEntrants : 0;
+      stats.dmcs = stats.nombreAppelsSortants > 0 ? stats.dtcs / stats.nombreAppelsSortants : 0;
+  
+      results.push(stats);
+    }
+  
+    return results;
+  }
+    
+  async getSummedAgentStatisticsForAllCompagnes(agentId: number, dateDebut: Date, dateFin: Date): Promise<any> {
+    const startDate = new Date(dateDebut);
+    const endDate = new Date(dateFin);
+  
+    const result = {
+      nombreAppelsEntrants: 0,
+      dtce: 0,
+      nombreAppelsSortants: 0,
+      dtcs: 0,
+      totalDays: 0,
+      dmce: 0,
+      dmcs: 0,
+    };
+  
+    // Query to get all compagnes the agent works for
+    const compagnes = await this.compagneRepository
+      .createQueryBuilder('compagne')
+      .leftJoinAndSelect('compagne.agents', 'agent')
+      .where('agent.id = :agentId', { agentId })
+      .getMany();
+  
+    // Loop through each compagne and aggregate statistics
+    for (const compagne of compagnes) {
+      let currentDate = new Date(startDate);
+      while (currentDate <= endDate) {
+        const dayStart = new Date(currentDate);
+        dayStart.setHours(0, 0, 0, 0);
+        const dayEnd = new Date(currentDate);
+        dayEnd.setHours(23, 59, 59, 999);
+  
+        const dayStats = await this.statisticsRepository.findOne({
+          where: {
+            agent: { id: agentId },
+            compagne: { id: compagne.id },
+            dateDebut: Between(dayStart, dayEnd),
+          },
+        });
+  
+        if (dayStats) {
+          result.nombreAppelsEntrants += dayStats.nombreAppelsEntrants;
+          result.dtce += dayStats.dtce;
+          result.nombreAppelsSortants += dayStats.nombreAppelsSortants;
+          result.dtcs += dayStats.dtcs;
+          result.totalDays += 1;
+        }
+  
+        currentDate.setDate(currentDate.getDate() + 1);
+      }
+    }
+  
+    // Calculate averages for dmce and dmcs
+    result.dmce = result.nombreAppelsEntrants > 0 ? result.dtce / result.nombreAppelsEntrants : 0;
+    result.dmcs = result.nombreAppelsSortants > 0 ? result.dtcs / result.nombreAppelsSortants : 0;
+  
+    return result;
+  }
   
 
   async findAll(): Promise<Statistics[]> {
