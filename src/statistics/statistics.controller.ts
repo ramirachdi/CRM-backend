@@ -38,6 +38,35 @@ export class StatisticsController {
     );
   }
 
+  @Get('compagneBetweenDates')
+  async getCompagneStatisticsBetweenDates(
+    @Query('compagneId') compagneId: string,
+    @Query('dateDebut') dateDebut: string,
+    @Query('dateFin') dateFin: string,
+  ) {
+    const parsedCompagneId = parseInt(compagneId);
+    const parsedDateDebut = new Date(dateDebut);
+    const parsedDateFin = new Date(dateFin);
+  
+    if (
+      isNaN(parsedCompagneId) ||
+      isNaN(parsedDateDebut.getTime()) ||
+      isNaN(parsedDateFin.getTime())
+    ) {
+      throw new HttpException(
+        "Invalid input: please ensure compagneId, dateDebut, and dateFin are correctly formatted.",
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  
+    return this.statisticsService.getCompagneStatisticsBetweenDates(
+      parsedCompagneId,
+      parsedDateDebut,
+      parsedDateFin,
+    );
+  }
+  
+
   @Get(':id')
   findOne(@Param('id') id: string): Promise<Statistics> {
     return this.statisticsService.findOne(+id);
