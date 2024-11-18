@@ -121,6 +121,19 @@ export class StatisticsService {
   ): Promise<any> {
     const startDate = new Date(dateDebut);
     const endDate = new Date(dateFin);
+
+    if (compagneId === null) {
+      // Fetch stats for all compagnes
+      const compagnes = await this.compagneRepository.find();
+      const results = [];
+  
+      for (const compagne of compagnes) {
+        const result = await this.getCompagneStatisticsBetweenDates(compagne.id, startDate, endDate);
+        results.push({ compagneName: compagne.name, ...result });
+      }
+  
+      return results;
+    }
   
     // Initialize result object
     const result = {
@@ -240,6 +253,19 @@ export class StatisticsService {
   async getSummedAgentStatisticsForAllCompagnes(agentId: number, dateDebut: Date, dateFin: Date): Promise<any> {
     const startDate = new Date(dateDebut);
     const endDate = new Date(dateFin);
+
+    if (agentId === null) {
+      // Fetch stats for all agents
+      const agents = await this.agentRepository.find();
+      const results = [];
+  
+      for (const agent of agents) {
+        const result = await this.getSummedAgentStatisticsForAllCompagnes(agent.id, startDate, endDate);
+        results.push({ agentName: agent.name, ...result });
+      }
+  
+      return results;
+    }
   
     const result = {
       nombreAppelsEntrants: 0,

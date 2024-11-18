@@ -68,23 +68,24 @@ export class StatisticsController {
     @Query('dateDebut') dateDebut: string,
     @Query('dateFin') dateFin: string,
   ) {
-    const parsedAgentId = parseInt(agentId);
+    const parsedAgentId = agentId ? parseInt(agentId) : null;
     const parsedDateDebut = new Date(dateDebut);
     const parsedDateFin = new Date(dateFin);
-
-    if (isNaN(parsedAgentId) || isNaN(parsedDateDebut.getTime()) || isNaN(parsedDateFin.getTime())) {
+  
+    if (isNaN(parsedDateDebut.getTime()) || isNaN(parsedDateFin.getTime())) {
       throw new HttpException(
-        'Invalid input: ensure agentId, dateDebut, and dateFin are correctly formatted.',
+        'Invalid input: ensure dateDebut and dateFin are correctly formatted.',
         HttpStatus.BAD_REQUEST,
       );
     }
-
+  
     return this.statisticsService.getSummedAgentStatisticsForAllCompagnes(
       parsedAgentId,
       parsedDateDebut,
       parsedDateFin,
     );
   }
+  
 
 
   @Get('compagneBetweenDates')
@@ -93,17 +94,13 @@ export class StatisticsController {
     @Query('dateDebut') dateDebut: string,
     @Query('dateFin') dateFin: string,
   ) {
-    const parsedCompagneId = parseInt(compagneId);
+    const parsedCompagneId = compagneId ? parseInt(compagneId) : null;
     const parsedDateDebut = new Date(dateDebut);
     const parsedDateFin = new Date(dateFin);
   
-    if (
-      isNaN(parsedCompagneId) ||
-      isNaN(parsedDateDebut.getTime()) ||
-      isNaN(parsedDateFin.getTime())
-    ) {
+    if (isNaN(parsedDateDebut.getTime()) || isNaN(parsedDateFin.getTime())) {
       throw new HttpException(
-        "Invalid input: please ensure compagneId, dateDebut, and dateFin are correctly formatted.",
+        'Invalid input: ensure dateDebut and dateFin are correctly formatted.',
         HttpStatus.BAD_REQUEST,
       );
     }
@@ -115,7 +112,6 @@ export class StatisticsController {
     );
   }
   
-
   @Get(':id')
   findOne(@Param('id') id: string): Promise<Statistics> {
     return this.statisticsService.findOne(+id);
