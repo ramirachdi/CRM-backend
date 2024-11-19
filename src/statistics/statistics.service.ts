@@ -53,15 +53,28 @@ export class StatisticsService {
     return this.statisticsRepository.save(stats);
   }
   
-
+  //agent statistics for compagne between dates
   async getStatisticsBetweenDates(
-    agentId: number,
+    agentId: number | null,
     compagneId: number,
     dateDebut: Date,
     dateFin: Date
   ): Promise<any> {
     const startDate = new Date(dateDebut);
     const endDate = new Date(dateFin);
+  
+    if (agentId === null) {
+      // Fetch stats for all agents for the given compagne
+      const agents = await this.agentRepository.find();
+      const results = [];
+  
+      for (const agent of agents) {
+        const result = await this.getStatisticsBetweenDates(agent.id, compagneId, startDate, endDate);
+        results.push({ agentName: agent.name, ...result });
+      }
+  
+      return results;
+    }
   
     // Initialize result object
     const result = {
@@ -74,7 +87,7 @@ export class StatisticsService {
       dmcs: 0,
     };
   
-    // Loop through each day within the range from dateDebut to the dateFin
+    // Loop through each day within the range from dateDebut to dateFin
     let currentDate = new Date(startDate);
     while (currentDate <= endDate) {
       const dayStart = new Date(currentDate);
@@ -114,6 +127,8 @@ export class StatisticsService {
     };
   }
   
+  
+  //compagne statistics for all agents
   async getCompagneStatisticsBetweenDates(
     compagneId: number,
     dateDebut: Date,
@@ -188,6 +203,7 @@ export class StatisticsService {
     };
   }
   
+  //agent statistics for all compagnes
   async getAgentStatisticsForAllCompagnes(agentId: number, dateDebut: Date, dateFin: Date): Promise<any[]> {
     const startDate = new Date(dateDebut);
     const endDate = new Date(dateFin);
@@ -249,7 +265,8 @@ export class StatisticsService {
   
     return results;
   }
-    
+  
+  //agent summed statistics for all compagnes
   async getSummedAgentStatisticsForAllCompagnes(agentId: number, dateDebut: Date, dateFin: Date): Promise<any> {
     const startDate = new Date(dateDebut);
     const endDate = new Date(dateFin);
