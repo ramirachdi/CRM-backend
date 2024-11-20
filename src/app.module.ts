@@ -11,6 +11,11 @@ import { CompagnesModule } from './compagnes/compagnes.module';
 import { StatisticsService } from './statistics/statistics.service';
 import { StatisticsController } from './statistics/statistics.controller';
 import { StatisticsModule } from './statistics/statistics.module';
+import { DetailsService } from './details/details.service';
+import { DetailsController } from './details/details.controller';
+import { DetailsModule } from './details/details.module';
+import { PresencesService } from './presences/presence.service';
+import { PresencesModule } from './presences/presence.module';
 
 @Module({
   imports: [
@@ -27,8 +32,10 @@ import { StatisticsModule } from './statistics/statistics.module';
     AgentsModule,
     CompagnesModule,
     StatisticsModule,
+    DetailsModule,
+    PresencesModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [AppController, DetailsController],
+  providers: [AppService, DetailsService, PresencesService],
 })
 export class AppModule {}

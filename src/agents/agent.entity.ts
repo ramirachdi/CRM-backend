@@ -1,6 +1,7 @@
 import { Entity, Column, PrimaryGeneratedColumn, ManyToMany, JoinTable, OneToMany } from 'typeorm';
 import { Compagne } from '../compagnes/compagne.entity';
 import { Statistics } from '../statistics/statistics.entity';
+import { Presence } from '../presences/presence.entity';
 
 @Entity()
 export class Agent {
@@ -23,4 +24,8 @@ export class Agent {
 
   @OneToMany(() => Statistics, (statistics) => statistics.agent)
   statistics: Statistics[];
+
+  @OneToMany(() => Presence, (presence) => presence.agent)
+  presences: Presence[];
+
 }
