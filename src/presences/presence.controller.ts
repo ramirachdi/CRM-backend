@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Body, Param, Patch, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Patch,
+  Delete,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
 import { PresenceService } from './presence.service';
 import { CreatePresenceDto } from '../dto/create-presence.dto';
 import { Presence } from './presence.entity';
@@ -17,13 +27,30 @@ export class PresenceController {
     @Param('agentId') agentId: number,
     @Param('date') date: string,
   ): Promise<Presence[]> {
-    return this.presenceService.findByAgentAndDate(agentId, new Date(date));
+    const parsedDate = new Date(date);
+    if (isNaN(parsedDate.getTime())) {
+      throw new HttpException(
+        'Invalid date format. Ensure the date is correctly formatted (YYYY-MM-DD).',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    return this.presenceService.findByAgentAndDate(agentId, parsedDate);
   }
 
   @Get('date/:date')
-  async findByDate(@Param('date') date: string) {
-    return this.presenceService.findByDate(new Date(date));
+  async findByDate(@Param('date') date: string): Promise<Presence[]> {
+    const parsedDate = new Date(date);
+  
+    if (isNaN(parsedDate.getTime())) {
+      throw new HttpException(
+        'Invalid date format. Ensure the date is correctly formatted (YYYY-MM-DD).',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  
+    return this.presenceService.findByDate(parsedDate);
   }
+  
 
   @Get()
   async findAll(): Promise<Presence[]> {

@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository,Between } from 'typeorm';
 import { Presence } from './presence.entity';
 import { CreatePresenceDto } from '../dto/create-presence.dto';
 import { Agent } from '../agents/agent.entity';
@@ -41,18 +41,26 @@ export class PresenceService {
   }
 
   async findByAgentAndDate(agentId: number, date: Date): Promise<Presence[]> {
+    const formattedDate = this.formatDate(date);
     return this.presenceRepository.find({
-      where: { agent: { id: agentId }, date },
+      where: { agent: { id: agentId }, date: new Date(formattedDate) },
       relations: ['agent'],
     });
   }
 
   async findByDate(date: Date): Promise<Presence[]> {
+    const startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0); // Set to the start of the day
+  
+    const endOfDay = new Date(date);
+    endOfDay.setHours(23, 59, 59, 999); // Set to the end of the day
+  
     return this.presenceRepository.find({
-      where: { date },
+      where: { date: Between(startOfDay, endOfDay) },
       relations: ['agent'],
     });
   }
+  
 
   async updatePresence(id: number, updateDto: Partial<CreatePresenceDto>): Promise<Presence> {
     const presence = await this.presenceRepository.findOne({ where: { id } });
@@ -90,5 +98,9 @@ export class PresenceService {
     const seconds = durationInSeconds % 60;
 
     return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+  }
+
+  private formatDate(date: Date): string {
+    return date.toISOString().split('T')[0]; // Formats date to YYYY-MM-DD
   }
 }
