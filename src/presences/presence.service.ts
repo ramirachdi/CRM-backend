@@ -37,12 +37,20 @@ export class PresenceService {
   }
 
   async findAll(): Promise<Presence[]> {
-    return this.presenceRepository.find();
+    return this.presenceRepository.find({ relations: ['agent'] });
   }
 
   async findByAgentAndDate(agentId: number, date: Date): Promise<Presence[]> {
     return this.presenceRepository.find({
       where: { agent: { id: agentId }, date },
+      relations: ['agent'],
+    });
+  }
+
+  async findByDate(date: Date): Promise<Presence[]> {
+    return this.presenceRepository.find({
+      where: { date },
+      relations: ['agent'],
     });
   }
 

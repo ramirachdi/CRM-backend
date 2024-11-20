@@ -12,17 +12,22 @@ export class PresenceController {
     return this.presenceService.createPresence(createPresenceDto);
   }
 
-  @Get()
-  async findAll(): Promise<Presence[]> {
-    return this.presenceService.findAll();
-  }
-
   @Get('agent/:agentId/date/:date')
   async findByAgentAndDate(
     @Param('agentId') agentId: number,
     @Param('date') date: string,
   ): Promise<Presence[]> {
     return this.presenceService.findByAgentAndDate(agentId, new Date(date));
+  }
+
+  @Get('date/:date')
+  async findByDate(@Param('date') date: string) {
+    return this.presenceService.findByDate(new Date(date));
+  }
+
+  @Get()
+  async findAll(): Promise<Presence[]> {
+    return this.presenceService.findAll();
   }
 
   @Patch(':id')
