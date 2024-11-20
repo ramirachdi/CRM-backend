@@ -1,7 +1,9 @@
-import { IsDate, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsDate, IsNotEmpty, IsOptional, IsString, IsInt } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class CreatePresenceDto {
   @IsNotEmpty()
+  @Type(() => Date)
   @IsDate()
   date: Date;
 
@@ -13,13 +15,11 @@ export class CreatePresenceDto {
   @IsString()
   logout: string;
 
-  @IsOptional()
-  @IsString()
-  dureeLog: string;
-
   @IsNotEmpty()
+  @IsInt()
   agentId: number;
 
   @IsOptional()
-  detailsId: number;
+  @IsInt()
+  detailsId: number; 
 }

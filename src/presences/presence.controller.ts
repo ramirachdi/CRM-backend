@@ -1,37 +1,40 @@
-import { Controller, Get, Post, Body, Param, Put, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Patch, Delete } from '@nestjs/common';
 import { PresenceService } from './presence.service';
 import { CreatePresenceDto } from '../dto/create-presence.dto';
-import { UpdatePresenceDto } from '../dto/update-presence.dto';
+import { Presence } from './presence.entity';
 
 @Controller('presences')
 export class PresenceController {
   constructor(private readonly presenceService: PresenceService) {}
 
   @Post()
-  async create(@Body() createPresenceDto: CreatePresenceDto) {
-    return this.presenceService.create(createPresenceDto);
+  async createPresence(@Body() createPresenceDto: CreatePresenceDto): Promise<Presence> {
+    return this.presenceService.createPresence(createPresenceDto);
   }
 
   @Get()
-  async findAll() {
+  async findAll(): Promise<Presence[]> {
     return this.presenceService.findAll();
   }
 
-  @Get(':id')
-  async findOne(@Param('id') id: number) {
-    return this.presenceService.findOne(id);
+  @Get('agent/:agentId/date/:date')
+  async findByAgentAndDate(
+    @Param('agentId') agentId: number,
+    @Param('date') date: string,
+  ): Promise<Presence[]> {
+    return this.presenceService.findByAgentAndDate(agentId, new Date(date));
   }
 
-  @Put(':id')
-  async update(
+  @Patch(':id')
+  async updatePresence(
     @Param('id') id: number,
-    @Body() updatePresenceDto: UpdatePresenceDto,
-  ) {
-    return this.presenceService.update(id, updatePresenceDto);
+    @Body() updateDto: Partial<CreatePresenceDto>,
+  ): Promise<Presence> {
+    return this.presenceService.updatePresence(id, updateDto);
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: number) {
-    return this.presenceService.remove(id);
+  async deletePresence(@Param('id') id: number): Promise<void> {
+    return this.presenceService.deletePresence(id);
   }
 }
