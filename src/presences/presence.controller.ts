@@ -12,6 +12,8 @@ import {
 import { PresenceService } from './presence.service';
 import { CreatePresenceDto } from '../dto/create-presence.dto';
 import { Presence } from './presence.entity';
+import { Details } from '../details/details.entity';
+
 
 @Controller('presences')
 export class PresenceController {
@@ -49,6 +51,11 @@ export class PresenceController {
     }
   
     return this.presenceService.findByDate(parsedDate);
+  }
+
+  @Get(':id/details')
+  async getDetailsForPresence(@Param('id') presenceId: number): Promise<Details> {
+    return this.presenceService.getPresenceDetails(presenceId);
   }
   
 

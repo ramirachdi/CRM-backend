@@ -4,8 +4,10 @@ import {
   Column,
   ManyToOne,
   JoinColumn,
+  OneToOne
 } from 'typeorm';
 import { Agent } from '../agents/agent.entity';
+import { Details } from '../details/details.entity';
 
 @Entity()
 export class Presence {
@@ -28,6 +30,6 @@ export class Presence {
   @JoinColumn({ name: 'agentId' })
   agent: Agent;
 
-  @Column({ nullable: true })
-  detailsId: number; // Assuming a future relationship
+  @OneToOne(() => Details, (details) => details.presence, { cascade: true, eager: true })
+  details: Details;
 }

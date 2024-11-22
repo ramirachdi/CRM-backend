@@ -1,9 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository,Between } from 'typeorm';
+import { Repository, Between } from 'typeorm';
 import { Presence } from './presence.entity';
 import { CreatePresenceDto } from '../dto/create-presence.dto';
 import { Agent } from '../agents/agent.entity';
+import { Details } from '../details/details.entity';
 
 @Injectable()
 export class PresenceService {
@@ -12,6 +13,8 @@ export class PresenceService {
     private presenceRepository: Repository<Presence>,
     @InjectRepository(Agent)
     private agentRepository: Repository<Agent>,
+    @InjectRepository(Details)
+    private detailsRepository: Repository<Details>,
   ) {}
 
   async createPresence(createPresenceDto: CreatePresenceDto): Promise<Presence> {
@@ -22,6 +25,14 @@ export class PresenceService {
       throw new NotFoundException(`Agent with ID ${agentId} not found.`);
     }
 
+    let details = null;
+    if (detailsId) {
+      details = await this.detailsRepository.findOne({ where: { id: detailsId } });
+      if (!details) {
+        throw new NotFoundException(`Details with ID ${detailsId} not found.`);
+      }
+    }
+
     const dureeLog = this.calculateDureeLog(login, logout);
 
     const presence = this.presenceRepository.create({
@@ -30,37 +41,42 @@ export class PresenceService {
       logout,
       dureeLog,
       agent,
-      detailsId,
+      details,
     });
 
     return this.presenceRepository.save(presence);
   }
 
   async findAll(): Promise<Presence[]> {
-    return this.presenceRepository.find({ relations: ['agent'] });
+    return this.presenceRepository.find({ relations: ['agent', 'details'] });
   }
 
   async findByAgentAndDate(agentId: number, date: Date): Promise<Presence[]> {
-    const formattedDate = this.formatDate(date);
+    const startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0); // Start of the day
+    const endOfDay = new Date(date);
+    endOfDay.setHours(23, 59, 59, 999); // End of the day
+
     return this.presenceRepository.find({
-      where: { agent: { id: agentId }, date: new Date(formattedDate) },
-      relations: ['agent'],
+      where: {
+        agent: { id: agentId },
+        date: Between(startOfDay, endOfDay),
+      },
+      relations: ['agent', 'details'],
     });
   }
 
   async findByDate(date: Date): Promise<Presence[]> {
     const startOfDay = new Date(date);
-    startOfDay.setHours(0, 0, 0, 0); // Set to the start of the day
-  
+    startOfDay.setHours(0, 0, 0, 0); // Start of the day
     const endOfDay = new Date(date);
-    endOfDay.setHours(23, 59, 59, 999); // Set to the end of the day
-  
+    endOfDay.setHours(23, 59, 59, 999); // End of the day
+
     return this.presenceRepository.find({
       where: { date: Between(startOfDay, endOfDay) },
-      relations: ['agent'],
+      relations: ['agent', 'details'],
     });
   }
-  
 
   async updatePresence(id: number, updateDto: Partial<CreatePresenceDto>): Promise<Presence> {
     const presence = await this.presenceRepository.findOne({ where: { id } });
@@ -69,9 +85,18 @@ export class PresenceService {
       throw new NotFoundException(`Presence with ID ${id} not found.`);
     }
 
-    const { login, logout } = updateDto;
+    const { login, logout, detailsId } = updateDto;
+
     if (login && logout) {
       presence.dureeLog = this.calculateDureeLog(login, logout);
+    }
+
+    if (detailsId) {
+      const details = await this.detailsRepository.findOne({ where: { id: detailsId } });
+      if (!details) {
+        throw new NotFoundException(`Details with ID ${detailsId} not found.`);
+      }
+      presence.details = details;
     }
 
     Object.assign(presence, updateDto);
@@ -100,7 +125,20 @@ export class PresenceService {
     return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
   }
 
-  private formatDate(date: Date): string {
-    return date.toISOString().split('T')[0]; // Formats date to YYYY-MM-DD
+  async getPresenceDetails(presenceId: number): Promise<Details> {
+    const presence = await this.presenceRepository.findOne({
+      where: { id: presenceId },
+      relations: ['details'], // Ensure the details relation is loaded
+    });
+
+    if (!presence) {
+      throw new NotFoundException(`Presence with ID ${presenceId} not found.`);
+    }
+
+    if (!presence.details) {
+      throw new NotFoundException(`No details found for Presence ID ${presenceId}.`);
+    }
+
+    return presence.details;
   }
 }
